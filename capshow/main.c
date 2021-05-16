@@ -164,7 +164,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
     printf("%20s %6s %-6s %-20s %-20s %-20s %-20s %-20s\n", fieldNames[0], fieldNames[1],
            fieldNames[2], fieldNames[3], fieldNames[4], fieldNames[5], fieldNames[6], fieldNames[7]);
 
