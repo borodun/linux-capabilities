@@ -15,7 +15,7 @@ char fieldNames[8][20] = {{"NAME"},
                           {"INHERITABLE"},
                           {"PERMITTED"},
                           {"EFFECTIVE"},
-                          {"BOUND"},
+                          {"BOUNDING"},
                           {"AMBIENT"}};
 
 void printReadable(char *capNum) {
