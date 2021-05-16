@@ -1,10 +1,10 @@
 [Unit]
-  Description=Capability demo 1 from root
- 
+  Description=Capability demo 4 from root
+
 [Service]
-  ExecStart=/home/borodun/capabilities/demo1
+  ExecStart=/home/borodin/capabilities/demo4
   Type=forking
- 
- 
+  CapabilityBoundingSet=CAP_SYS_NICE
+
 [Install]
   WantedBy=multiuser.target

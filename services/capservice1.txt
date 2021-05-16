@@ -1,10 +1,9 @@
 [Unit]
   Description=Capability demo 1 from root
- 
+
 [Service]
   ExecStart=/home/borodin/capabilities/demo1
   Type=forking
- 
- 
+
 [Install]
   WantedBy=multiuser.target
