@@ -63,9 +63,9 @@ int processFile(char *p, int pid, int tid) {
     char values[fieldCount][20];
     for (int i = 0; i < fieldCount; ++i) {
         char *ptr = strstr(p, keys[i]);
-        ptr += strlen(keys[i]) + 1;
+        ptr += strlen(keys[i]) + 1; // + 1 to skip \t
         int j;
-        for (j = 0; j < 20 && *ptr != '\n'; ++j, ++ptr) {
+        for (j = 0; j < 19 && *ptr != '\n'; ++j, ++ptr) {
             values[i][j] = *ptr;
         }
         values[i][j] = '\0';
