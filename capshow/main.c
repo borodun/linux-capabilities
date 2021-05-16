@@ -26,16 +26,16 @@ void printReadable(char *capNum) {
     value = strtoull(capNum, NULL, 16);
     printf("0x%016llx=", value);
 
-    if (!memcmp("0000003fffffffff", capNum, 16)){
+    if (!memcmp("0000003fffffffff", capNum, 16)) {
         printf("all\n");
         return;
     }
-    if (!memcmp("0000000000000000", capNum, 16)){
+    if (!memcmp("0000000000000000", capNum, 16)) {
         printf("none\n");
         return;
     }
 
-    for (cap=0; (cap < 64) && (value >> cap); ++cap) {
+    for (cap = 0; (cap < 64) && (value >> cap); ++cap) {
         if (value & (1ULL << cap)) {
             char *ptr;
 
@@ -77,7 +77,7 @@ int processFile(char *p, int pid, int tid) {
     if (readable) {
         for (int i = 3; i < 8; ++i) {
             printf("%12s ", fieldNames[i]);
-            printReadable(values[i-2]);
+            printReadable(values[i - 2]);
         }
         printf("\n");
     }
