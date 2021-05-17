@@ -5,42 +5,44 @@
 #include <string.h>
 
 const char *capNames[CAP_LAST_CAP + 1] = {
-        "cap_chown",
-        "cap_dac_override",
-        "cap_dac_read_search",
-        "cap_fowner",
-        "cap_fsetid",
-        "cap_kill",
-        "cap_setgid",
-        "cap_setuid",
-        "cap_setpcap",
-        "cap_linux_immutable",
-        "cap_net_bind_service",
-        "cap_net_broadcast",
-        "cap_net_admin",
-        "cap_net_raw",
-        "cap_ipc_lock",
-        "cap_ipc_owner",
-        "cap_sys_module",
-        "cap_sys_rawio",
-        "cap_sys_chroot",
-        "cap_sys_ptrace",
-        "cap_sys_pacct",
-        "cap_sys_admin",
-        "cap_sys_boot",
-        "cap_sys_nice",
-        "cap_sys_resource",
-        "cap_sys_time",
-        "cap_sys_tty_config",
-        "cap_mknod",
-        "cap_lease",
-        "cap_audit_write",
-        "cap_audit_control",
-        "cap_setfcap",
-        "cap_mac_override",
-        "cap_mac_admin",
-        "cap_syslog"
-};
+        "chown",
+        "dac_override",
+        "dac_read_search",
+        "fowner",
+        "fsetid",
+        "kill",
+        "setgid",
+        "setuid",
+        "setpcap",
+        "linux_immutable",
+        "net_bind_service",
+        "net_broadcast",
+        "net_admin",
+        "net_raw",
+        "ipc_lock",
+        "ipc_owner",
+        "sys_module",
+        "sys_rawio",
+        "sys_chroot",
+        "sys_ptrace",
+        "sys_pacct",
+        "sys_admin",
+        "sys_boot",
+        "sys_nice",
+        "sys_resource",
+        "sys_time",
+        "sys_tty_config",
+        "mknod",
+        "lease",
+        "audit_write",
+        "audit_control",
+        "setfcap",
+        "mac_override",
+        "mac_admin",
+        "syslog",
+        "wake_alarm",
+        "block_suspend",
+        "audit_read"};
 
 int dropAmbientCap(int cap) {
     if (capng_update(CAPNG_DROP, CAPNG_INHERITABLE, cap) == -1) {
@@ -75,21 +77,33 @@ int addAmbientCap(int cap) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        printf("Usage: ./set_ambient -p pid +/-cap ...\n");
-        return -1;
-    }
-
     int pid;
     int optIdx;
     for (optIdx = 1; optIdx < argc; ++optIdx) {
-        if (!memcmp("-p", argv[optIdx], 2)) {
-            pid = atoi(argv[++optIdx]);
-            capng_setpid(pid);
-            ++optIdx;
-            break;
+        if (argv[optIdx][0] == '-') {
+            switch (argv[optIdx][1]) {
+                case 'p':
+                    pid = atoi(argv[optIdx + 1]);
+                    capng_setpid(pid);
+                    continue;
+                case 'l':
+                    printf("List of capabilities: \n");
+                    for (int i = 0; i < CAP_LAST_CAP + 1; ++i) {
+                        printf("\t%s\n", capNames[i]);
+                    }
+                    continue;
+                case 'c':
+                    ++optIdx;
+                    break;
+                case 'h':
+                    printf("Usage: %s [-l] -p pid +/-cap ...\n", argv[0]);
+                    return 0;
+                default:
+                    continue;
+            }
         }
     }
+
     int capNameLength = 20;
     char capName[capNameLength];
     int cap;
