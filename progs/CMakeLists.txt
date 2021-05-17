@@ -4,7 +4,7 @@ project(Capabilities)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(capshow capshow.c)
-add_executable(changeCaps changeCaps.c)
+add_executable(capchange capchange.c)
 
 target_link_libraries(capshow cap)
-target_link_libraries(changeCaps cap-ng)
+target_link_libraries(capchange cap-ng)
