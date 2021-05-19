@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(capshow capShow.c)
 add_executable(capenv capEnviron.c)
+add_executable(socketTest socketTes.c)
 
 target_link_libraries(capshow cap)
 target_link_libraries(capenv cap-ng)

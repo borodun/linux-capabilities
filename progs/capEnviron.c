@@ -58,7 +58,7 @@ int createCapabilityEnvironment(const int *caps, int capsAmount) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s [allowed capabilities] -p prog_path prog_args", argv[0]);
+        printf("Usage: %s [allowed capabilities] -p prog_path prog_args\n", argv[0]);
         return 0;
     }
 
@@ -68,23 +68,23 @@ int main(int argc, char *argv[]) {
         ++i;
     }
     capsArgsBorder = i;
-    if (capsArgsBorder != 1) {
-        int capsAmount = 0;
-        int caps[capsArgsBorder - 1];
-        for (i = 1; i < capsArgsBorder; ++i) {
-            int cap = capng_name_to_capability(argv[i]);
-            if (cap == -1) {
-                printf("No such capability: %s\n", argv[i]);
-                continue;
-            }
-            caps[i - 1] = cap;
-            ++capsAmount;
-        }
 
-        if (createCapabilityEnvironment(caps, capsAmount) == -1) {
-            return -1;
+    int capsAmount = 0;
+    int caps[capsArgsBorder - 1];
+    for (i = 1; i < capsArgsBorder; ++i) {
+        int cap = capng_name_to_capability(argv[i]);
+        if (cap == -1) {
+            printf("No such capability: %s\n", argv[i]);
+            continue;
         }
+        caps[i - 1] = cap;
+        ++capsAmount;
     }
+
+    if (createCapabilityEnvironment(caps, capsAmount) == -1) {
+        return -1;
+    }
+
 
     pid_t child;
     if ((child = fork()) == 0) {
