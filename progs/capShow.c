@@ -71,15 +71,16 @@ int processFile(char *p, int pid, int tid) {
         values[i][j] = '\0';
     }
 
-    printf("%20s %6d %-6d 0x%-18s 0x%-18s 0x%-18s 0x%-18s 0x%-18s\n", values[0], pid,
-           tid, values[1], values[2], values[3], values[4], values[5]);
-
     if (readable) {
+        printf("%20s %6d %-6d \n\n", values[0], pid, tid);
         for (int i = 3; i < 8; ++i) {
             printf("%12s ", fieldNames[i]);
             printReadable(values[i - 2]);
         }
         printf("\n");
+    } else {
+        printf("%20s %6d %-6d 0x%-18s 0x%-18s 0x%-18s 0x%-18s 0x%-18s\n", values[0], pid,
+               tid, values[1], values[2], values[3], values[4], values[5]);
     }
     return 1;
 }
@@ -163,9 +164,12 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
-    printf("%20s %6s %-6s %-20s %-20s %-20s %-20s %-20s\n", fieldNames[0], fieldNames[1],
-           fieldNames[2], fieldNames[3], fieldNames[4], fieldNames[5], fieldNames[6], fieldNames[7]);
+    if (readable) {
+        printf("%20s %6s %-6s \n", fieldNames[0], fieldNames[1], fieldNames[2]);
+    } else {
+        printf("%20s %6s %-6s %-20s %-20s %-20s %-20s %-20s\n", fieldNames[0], fieldNames[1],
+               fieldNames[2], fieldNames[3], fieldNames[4], fieldNames[5], fieldNames[6], fieldNames[7]);
+    }
 
     if (pid != 0) {
         printCaps(pid);

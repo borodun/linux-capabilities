@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
             printf("No such capability: %s\n", argv[i]);
             continue;
         }
-        caps[i - 1] = cap;
+        caps[capsAmount] = cap;
         ++capsAmount;
     }
 
