@@ -6,14 +6,14 @@
 #include <string.h>
 #include <wait.h>
 
-int addAmbientCaps(const int *caps, int size) {
+int createCapabilityEnvironment(const int *caps, int capsAmount) {
     capng_get_caps_process();
     capng_clear(CAPNG_SELECT_BOTH);
     if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED | CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
         printf("Cannot add cap\n");
         return -1;
     }
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < capsAmount; ++i) {
         int cap = caps[i];
         if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE | CAPNG_EFFECTIVE | CAPNG_PERMITTED | CAPNG_BOUNDING_SET, cap) ==
             -1) {
@@ -32,7 +32,7 @@ int addAmbientCaps(const int *caps, int size) {
     printf("Effective: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_EFFECTIVE));
     printf("Bounding: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_BOUNDING_SET));
 
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < capsAmount; ++i) {
         int cap = caps[i];
         if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) != 0) {
             char error[50];
@@ -58,7 +58,7 @@ int addAmbientCaps(const int *caps, int size) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s [capabilities] -p prog_path prog_args", argv[0]);
+        printf("Usage: %s [allowed capabilities] -p prog_path prog_args", argv[0]);
         return 0;
     }
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
             ++capsAmount;
         }
 
-        if (addAmbientCaps(caps, capsAmount) == -1) {
+        if (createCapabilityEnvironment(caps, capsAmount) == -1) {
             return -1;
         }
     }

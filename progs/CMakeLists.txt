@@ -3,8 +3,9 @@ project(Capabilities)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(capshow capshow.c)
-add_executable(capchange capchange.c)
+add_executable(capshow capShow.c)
+add_executable(capenv capEnviron.c)
 
 target_link_libraries(capshow cap)
-target_link_libraries(capchange cap-ng)
+target_link_libraries(capenv cap-ng)
+
