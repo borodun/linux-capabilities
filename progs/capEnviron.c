@@ -89,7 +89,6 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-
     pid_t child;
     if ((child = fork()) == 0) {
         execvp(argv[capsArgsBorder + 1], &argv[capsArgsBorder + 1]);
