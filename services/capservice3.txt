@@ -1,5 +1,5 @@
 [Unit]
-  Description=Capability demo 3 from root
+  Description=Capability demo 3 from user with ambient capability
 
 [Service]
   ExecStart=/home/borodin/capabilities/demo3

@@ -1,5 +1,5 @@
 [Unit]
-  Description=Capability demo 4 from root
+  Description=Capability demo 4 from root with bounding capability
 
 [Service]
   ExecStart=/home/borodin/capabilities/demo4
