@@ -1,22 +1,22 @@
 ## capshow
 Show every capability of all threads
 ```sh
-capshow
+$ capshow
 ```
 Show capabilities of particular process
 ```sh
-capshow -p pid
+$ capshow -p pid
 ```
 Show readable version of capabilities
 ```sh
-capshow -r
+$ capshow -r
 ```
 ## capenv
 An application locks itself, and all of its descendants, into an environment where the only way of gaining capabilities is by executing a program with associated file capabilities
 
 Run program with some capabilities
 ```sh
-sudo capenv [capabilities_to_add] -p program program args
+$ sudo capenv [capabilities_to_add] -p program program args
 ```
 Run programm without any capabilities
 
