@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <cap-ng.h>
 #include <sys/prctl.h>
+#include <linux/securebits.h>
 #include <string.h>
+#include <wait.h>
 
 const char *capNames[CAP_LAST_CAP + 1] = {
         "chown",
@@ -44,92 +46,104 @@ const char *capNames[CAP_LAST_CAP + 1] = {
         "block_suspend",
         "audit_read"};
 
-int dropAmbientCap(int cap) {
-    if (capng_update(CAPNG_DROP, CAPNG_INHERITABLE, cap) == -1) {
-        printf("Cannot add inheritable cap\n");
+int addAmbientCaps(const int *caps, int size) {
+    capng_get_caps_process();
+    capng_clear(CAPNG_SELECT_BOTH);
+    if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED |CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
+        printf("Cannot add cap\n");
         return -1;
     }
-    if (capng_apply(CAPNG_SELECT_CAPS) == -1) {
-        printf("Cannot apply inheritable cap\n");
+    for (int i = 0; i < size; ++i) {
+        int cap = caps[i];
+        if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE | CAPNG_EFFECTIVE | CAPNG_PERMITTED |CAPNG_BOUNDING_SET, cap) == -1) {
+            printf("Cannot add %s to caps\n", capng_capability_to_name(cap));
+            return -1;
+        }
+    }
+    int ret = capng_apply(CAPNG_SELECT_BOTH);
+    if (ret < 0) {
+        printf("capng_apply failed to apply caps with return value %d\n", ret);
         return -1;
     }
-    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_LOWER, cap, 0, 0)) {
-        perror("Cannot set cap");
-        return -1;
-    }
-    return 0;
-}
 
-int addAmbientCap(int cap) {
-    if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE, cap) == -1) {
-        printf("Cannot add inheritable cap\n");
+    printf("Inheritable: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_INHERITABLE));
+    printf("Permitted: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_PERMITTED));
+    printf("Effective: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_EFFECTIVE));
+    printf("Bounding: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_BOUNDING_SET));
+
+    for (int i = 0; i < size; ++i) {
+        int cap = caps[i];
+        if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) != 0 ) {
+            char error[50];
+            snprintf(error, sizeof(error), "Cannot set %s as ambient cap", capng_capability_to_name(cap));
+            perror(error);
+            return -1;
+        }
+    }
+
+    printf("%d\n",prctl(PR_GET_SECUREBITS));
+    if (prctl(PR_SET_SECUREBITS,
+              SECBIT_KEEP_CAPS_LOCKED |
+              SECBIT_NO_SETUID_FIXUP |
+              SECBIT_NO_SETUID_FIXUP_LOCKED |
+              SECBIT_NOROOT |
+              SECBIT_NOROOT_LOCKED) != 0 ) {
+        perror("Cannot set secure bits");
         return -1;
     }
-    if (capng_apply(CAPNG_SELECT_CAPS) == -1) {
-        printf("Cannot apply inheritable cap\n");
-        return -1;
-    }
-    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0)) {
-        perror("Cannot set cap");
-        return -1;
-    }
+    printf("%d\n",prctl(PR_GET_SECUREBITS));
     return 0;
 }
 
 int main(int argc, char *argv[]) {
-    int pid;
-    int optIdx;
-    for (optIdx = 1; optIdx < argc; ++optIdx) {
-        if (argv[optIdx][0] == '-') {
-            switch (argv[optIdx][1]) {
-                case 'p':
-                    pid = atoi(argv[optIdx + 1]);
-                    capng_setpid(pid);
-                    continue;
-                case 'l':
-                    printf("List of capabilities: \n");
-                    for (int i = 0; i < CAP_LAST_CAP + 1; ++i) {
-                        printf("\t%s\n", capNames[i]);
-                    }
-                    continue;
-                case 'c':
-                    ++optIdx;
-                    break;
-                case 'h':
-                    printf("Usage: %s [-l] -p pid +/-cap ...\n", argv[0]);
-                    return 0;
-                default:
-                    continue;
+    if (argc < 2) {
+        printf("Usage: %s [capabilities] -p prog_path prog_args", argv[0]);
+        return 0;
+    }
+
+    int capsArgsBorder;
+    int i = 0;
+    while (memcmp("-p", argv[i], 2) != 0) {
+        ++i;
+    }
+    capsArgsBorder = i;
+    if(capsArgsBorder != 1) {
+        int capsAmount = 0;
+        int caps[capsArgsBorder - 1];
+        for (i = 1; i < capsArgsBorder; ++i) {
+            int cap = capng_name_to_capability(argv[i]);
+            if (cap == -1) {
+                printf("No such capability: %s\n", argv[i]);
+                continue;
             }
+            caps[i - 1] = cap;
+            ++capsAmount;
+        }
+
+        if (addAmbientCaps(caps, capsAmount) == -1) {
+            return -1;
         }
     }
 
-    int capNameLength = 20;
-    char capName[capNameLength];
-    int cap;
-    for (int i = optIdx; i < argc; ++i) {
-        switch (argv[i][0]) {
-            case '-':
-                strncpy(capName, &argv[i][1], capNameLength);
-                cap = capng_name_to_capability(capName);
-                if (cap == -1) {
-                    printf("No such capability: %s\n", capName);
-                    continue;
-                }
-                dropAmbientCap(cap);
-                continue;
-            case '+':
-                strncpy(capName, &argv[i][1], capNameLength);
-                cap = capng_name_to_capability(capName);
-                if (cap == -1) {
-                    printf("No such capability: %s\n", capName);
-                    continue;
-                }
-                addAmbientCap(cap);
-                continue;
-            default:
-                continue;
-        }
+    pid_t child;
+    if ((child = fork()) == 0) {
+        execvp(argv[capsArgsBorder + 1], &argv[capsArgsBorder + 1]);
+        perror("Error occurred when trying to execute a program");
+        return -1;
+    } else if (child == -1) {
+        perror("Error occurred when trying to fork a process");
+        return -1;
+    }
+    printf("Waiting for child with pid %d\n", child);
+
+    int status;
+    child = wait(&status);
+    if (child == -1) {
+        perror("Error occurred while waiting for child death");
+        return -1;
+    }
+    if (WIFEXITED(status)) {
+        printf("Exit status of child with pid %d: %d\n", child, WEXITSTATUS(status));
     }
     return 0;
 }
