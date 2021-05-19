@@ -9,7 +9,7 @@ Then compile using gcc
 ```sh
 $ gcc capShow.c -o capshow -lcap
 ```
-##Usage
+## Usage
 Show every capability of all threads
 ```sh
 $ capshow
@@ -34,7 +34,7 @@ Then compile using gcc
 ```sh
 $ gcc capEnviron.c -o capenv -lcap-ng
 ```
-##Usage
+## Usage
 
 Run program with some capabilities
 ```sh
