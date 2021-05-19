@@ -9,13 +9,14 @@
 int addAmbientCaps(const int *caps, int size) {
     capng_get_caps_process();
     capng_clear(CAPNG_SELECT_BOTH);
-    if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED |CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
+    if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED | CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
         printf("Cannot add cap\n");
         return -1;
     }
     for (int i = 0; i < size; ++i) {
         int cap = caps[i];
-        if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE | CAPNG_EFFECTIVE | CAPNG_PERMITTED |CAPNG_BOUNDING_SET, cap) == -1) {
+        if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE | CAPNG_EFFECTIVE | CAPNG_PERMITTED | CAPNG_BOUNDING_SET, cap) ==
+            -1) {
             printf("Cannot add %s to caps\n", capng_capability_to_name(cap));
             return -1;
         }
@@ -33,7 +34,7 @@ int addAmbientCaps(const int *caps, int size) {
 
     for (int i = 0; i < size; ++i) {
         int cap = caps[i];
-        if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) != 0 ) {
+        if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) != 0) {
             char error[50];
             snprintf(error, sizeof(error), "Cannot set %s as ambient cap", capng_capability_to_name(cap));
             perror(error);
@@ -41,17 +42,17 @@ int addAmbientCaps(const int *caps, int size) {
         }
     }
 
-    printf("%d\n",prctl(PR_GET_SECUREBITS));
+    printf("%d\n", prctl(PR_GET_SECUREBITS));
     if (prctl(PR_SET_SECUREBITS,
               SECBIT_KEEP_CAPS_LOCKED |
               SECBIT_NO_SETUID_FIXUP |
               SECBIT_NO_SETUID_FIXUP_LOCKED |
               SECBIT_NOROOT |
-              SECBIT_NOROOT_LOCKED) != 0 ) {
+              SECBIT_NOROOT_LOCKED) != 0) {
         perror("Cannot set secure bits");
         return -1;
     }
-    printf("%d\n",prctl(PR_GET_SECUREBITS));
+    printf("%d\n", prctl(PR_GET_SECUREBITS));
     return 0;
 }
 
@@ -67,7 +68,7 @@ int main(int argc, char *argv[]) {
         ++i;
     }
     capsArgsBorder = i;
-    if(capsArgsBorder != 1) {
+    if (capsArgsBorder != 1) {
         int capsAmount = 0;
         int caps[capsArgsBorder - 1];
         for (i = 1; i < capsArgsBorder; ++i) {
@@ -104,6 +105,8 @@ int main(int argc, char *argv[]) {
     }
     if (WIFEXITED(status)) {
         printf("Exit status of child with pid %d: %d\n", child, WEXITSTATUS(status));
+    } else {
+        printf("Child %d exited incorrectly\n", child);
     }
     return 0;
 }
