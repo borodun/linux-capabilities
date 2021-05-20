@@ -38,7 +38,7 @@ $ gcc capEnviron.c -o capenv -lcap-ng
 
 Run program with some capabilities
 ```sh
-$ sudo capenv [capabilities_to_add] -p program program args
+$ sudo capenv [capabilities_to_add] -p program program_args
 ```
 Run programm without any capabilities
 
