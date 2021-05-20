@@ -38,10 +38,12 @@ $ gcc capEnviron.c -o capenv -lcap-ng
 
 Run program with some capabilities
 ```sh
-$ sudo ./capenv [capabilities_to_add] -p program_path program_args
+$ sudo ./capenv (capabilities_to_add ...) -p program_path program_args
 ```
 Run programm without any capabilities
-
+```sh
+$ sudo ./capenv -p program_path program_args
+```
 ## services
 
 Services were used for testing ways of manipulating capabilities of a program
