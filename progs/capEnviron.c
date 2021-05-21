@@ -8,33 +8,30 @@
 
 int createCapabilityEnvironment(const int *caps, int capsAmount) {
     capng_get_caps_process();
-    capng_clear(CAPNG_SELECT_BOTH);
+    capng_clear(CAPNG_SELECT_CAPS);
     if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE |
-                                CAPNG_PERMITTED |
-                                CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
+                                CAPNG_PERMITTED , CAP_SETPCAP) == -1) {
         printf("Cannot add cap\n");
         return -1;
     }
     for (int i = 0; i < capsAmount; ++i) {
         int cap = caps[i];
         if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE |
-                                    CAPNG_EFFECTIVE |
-                                    CAPNG_PERMITTED |
-                                    CAPNG_BOUNDING_SET, cap) == -1) {
+                                    CAPNG_PERMITTED , cap) == -1) {
             printf("Cannot add %s to caps\n", capng_capability_to_name(cap));
             return -1;
         }
     }
-    int ret = capng_apply(CAPNG_SELECT_BOTH);
+    int ret = capng_apply(CAPNG_SELECT_CAPS);
     if (ret < 0) {
         printf("capng_apply failed to apply caps with return value %d\n", ret);
         return -1;
     }
 
-    printf("Inheritable: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_INHERITABLE));
-    printf("Permitted: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_PERMITTED));
-    printf("Effective: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_EFFECTIVE));
-    printf("Bounding: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_BOUNDING_SET));
+    //printf("Inheritable: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_INHERITABLE));
+    //printf("Permitted: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_PERMITTED));
+    //printf("Effective: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_EFFECTIVE));
+    //printf("Bounding: %s \n", capng_print_caps_text(CAPNG_PRINT_BUFFER, CAPNG_BOUNDING_SET));
 
     for (int i = 0; i < capsAmount; ++i) {
         int cap = caps[i];
@@ -46,7 +43,6 @@ int createCapabilityEnvironment(const int *caps, int capsAmount) {
         }
     }
 
-    printf("%d\n", prctl(PR_GET_SECUREBITS));
     if (prctl(PR_SET_SECUREBITS,
               SECBIT_KEEP_CAPS_LOCKED |
               SECBIT_NO_SETUID_FIXUP |
@@ -56,7 +52,7 @@ int createCapabilityEnvironment(const int *caps, int capsAmount) {
         perror("Cannot set secure bits");
         return -1;
     }
-    printf("%d\n", prctl(PR_GET_SECUREBITS));
+
     return 0;
 }
 

@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     while (poll(&pfd, 1, 100) == 0) {
         const int result = ping(host, timeout, &reply_time);
         if (result == -1) {
-            printf("Host is not available.\n");
+            perror("Error: ");
             return EXIT_FAILURE;
         } else if (result == 1) {
             printf("Timeout.\n");
