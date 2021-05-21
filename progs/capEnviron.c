@@ -8,21 +8,23 @@
 
 int createCapabilityEnvironment(const int *caps, int capsAmount) {
     capng_get_caps_process();
-    capng_clear(CAPNG_SELECT_CAPS);
+    capng_clear(CAPNG_SELECT_BOTH);
     if (capng_update(CAPNG_ADD, CAPNG_EFFECTIVE |
-                                CAPNG_PERMITTED , CAP_SETPCAP) == -1) {
+                                CAPNG_PERMITTED |
+                                CAPNG_BOUNDING_SET, CAP_SETPCAP) == -1) {
         printf("Cannot add cap\n");
         return -1;
     }
     for (int i = 0; i < capsAmount; ++i) {
         int cap = caps[i];
         if (capng_update(CAPNG_ADD, CAPNG_INHERITABLE |
-                                    CAPNG_PERMITTED , cap) == -1) {
+                                    CAPNG_PERMITTED |
+                                    CAPNG_BOUNDING_SET, cap) == -1) {
             printf("Cannot add %s to caps\n", capng_capability_to_name(cap));
             return -1;
         }
     }
-    int ret = capng_apply(CAPNG_SELECT_CAPS);
+    int ret = capng_apply(CAPNG_SELECT_BOTH);
     if (ret < 0) {
         printf("capng_apply failed to apply caps with return value %d\n", ret);
         return -1;
