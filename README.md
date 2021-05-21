@@ -12,15 +12,15 @@ $ gcc capShow.c -o capshow -lcap
 ## Usage
 Show every capability of all threads
 ```sh
-$ capshow
+$ ./capshow
 ```
 Show capabilities of particular process
 ```sh
-$ capshow -p pid
+$ ./capshow -p pid
 ```
 Show readable version of capabilities
 ```sh
-$ capshow -r
+$ ./capshow -r
 ```
 # capenv
 An application locks itself, and all of its descendants, into an environment where the only way of gaining capabilities is by executing a program with associated file capabilities
@@ -38,10 +38,12 @@ $ gcc capEnviron.c -o capenv -lcap-ng
 
 Run program with some capabilities
 ```sh
-$ sudo capenv [capabilities_to_add] -p program program args
+$ sudo ./capenv (capabilities_to_add ...) -p program_path program_args
 ```
 Run programm without any capabilities
-
+```sh
+$ sudo ./capenv -p program_path program_args
+```
 ## services
 
 Services were used for testing ways of manipulating capabilities of a program
